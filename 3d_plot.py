@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -39,14 +40,16 @@ def plot_crystal_structure(atom_filename, bond_filename, show_labels=True):
         x = [float(atom_data[int(atom1) - 1][0]), float(atom_data[int(atom2) - 1][0])]
         y = [float(atom_data[int(atom1) - 1][1]), float(atom_data[int(atom2) - 1][1])]
         z = [float(atom_data[int(atom1) - 1][2]), float(atom_data[int(atom2) - 1][2])]
-        ax.plot(x, y, z, color=(r, g, b), linewidth=line_width)
+        ax.plot(x, y, z, c=(r, g, b), linewidth=line_width)
 
-    # グラフの表示
+    # 3Dプロットの表示
     plt.show()
 
-# テスト用のファイルパス
-atom_filename = 'atom_Y123.txt'
-bond_filename = 'bond_Y123.txt'
+if __name__ == "__main__":
+    # コマンドライン引数の解析
+    atom_filename = sys.argv[1]
+    bond_filename = sys.argv[2]
+    show_labels = True if len(sys.argv) > 3 and sys.argv[3] == 'True' else False
 
-# 原子構造のプロット
-plot_crystal_structure(atom_filename, bond_filename, show_labels=False)
+    # 原子構造のプロット
+    plot_crystal_structure(atom_filename, bond_filename, show_labels)
