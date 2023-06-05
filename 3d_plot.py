@@ -45,8 +45,8 @@ def plot_crystal_structure(atom_filename, bond_filename, show_labels=True):
     plt.show()
 
 # テスト用のファイルパス
-atom_filename = 'atom_data.txt'
-bond_filename = 'bond_data.txt'
+atom_filename = 'atom_Y123.txt'
+bond_filename = 'bond_Y123.txt'
 
 # 原子構造のプロット
-plot_crystal_structure(atom_filename, bond_filename, show_labels=True)
+plot_crystal_structure(atom_filename, bond_filename, show_labels=False)
