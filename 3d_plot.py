@@ -1,57 +1,62 @@
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import streamlit as st
 
-def plot_crystal_structure(atom_filename, bond_filename, show_labels=True):
-    # 軸の比を初期化
-    axis_ratio = [1.0, 1.0, 1.0]
+def main():
 
-    # 原子データの読み込み
-    with open(atom_filename, 'r', encoding='utf-8') as atom_file:
+    def read_atom_data(atom_file):
+        atom_positions = []
+        atom_colors = []
+        atom_radii = []
+        atom_labels = []
+    
         lines = atom_file.readlines()
-        # 軸の比を取得
-        axis_ratio = [float(val) for val in lines[0].strip().split('\t')]
-        # 原子データを読み込み
-        atom_data = [line.strip().split('\t') for line in lines[1:]]
+        axis_ratio = [float(val) for val in lines[0].decode().strip().split('\t')]
+        atom_data = [line.decode().strip().split('\t') for line in lines[1:]]
+        return atom_data, axis_ratio
+    
+    def read_bond_data(bond_file):
+        bond_data = [line.decode().strip().split('\t') for line in bond_file.readlines()]
+        return bond_data
+    
+    def plot_crystal_structure(atom_data, bond_data, show_labels=True, axis_ratio=[1.0, 1.0, 1.0]):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_box_aspect(axis_ratio)
+        ax.axis('off')
+    
+        for data in atom_data:
+            x, y, z, r, g, b, radius = map(float, data[:7])
+            label = str(data[7])
+            ax.scatter(x, y, z, s=radius**2, c=(r, g, b))
 
-    # 結合データの読み込み
-    with open(bond_filename, 'r', encoding='utf-8') as bond_file:
-        bond_data = [line.strip().split('\t') for line in bond_file.readlines()]
-
-    # 3Dプロットの設定
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_box_aspect(axis_ratio)
-    ax.axis('off')  # 軸を非表示にする
-
-    # 原子のプロット
-    for data in atom_data:
-        x, y, z, r, g, b, radius = map(float, data[:7])
-        label = str(data[7])  # ラベルを文字列に変換
-        ax.scatter(x, y, z, s=radius**2, c=(r, g, b))
-
-        if show_labels:
-            ax.text(x, y, z, label)
-
-    # 結合のプロット
-    for data in bond_data:
-        atom1, atom2, r, g, b, line_width = map(float, data[:6])
-        x = [float(atom_data[int(atom1) - 1][0]), float(atom_data[int(atom2) - 1][0])]
-        y = [float(atom_data[int(atom1) - 1][1]), float(atom_data[int(atom2) - 1][1])]
-        z = [float(atom_data[int(atom1) - 1][2]), float(atom_data[int(atom2) - 1][2])]
-        ax.plot(x, y, z, c=(r, g, b), linewidth=line_width)
-
-    # 3Dプロットの表示
-    plt.show()
-
+            if show_labels:
+                ax.text(x, y, z, label)
+    
+        for data in bond_data:
+            atom1, atom2, r, g, b, line_width = map(float, data[:6])
+            x = [float(atom_data[int(atom1) - 1][0]), float(atom_data[int(atom2) - 1][0])]
+            y = [float(atom_data[int(atom1) - 1][1]), float(atom_data[int(atom2) - 1][1])]
+            z = [float(atom_data[int(atom1) - 1][2]), float(atom_data[int(atom2) - 1][2])]
+            ax.plot(x, y, z, c=(r, g, b), linewidth=line_width)
+    
+        return fig
+    
+    st.title('Crystal Structure Plotting')
+    
+    atom_file = st.file_uploader('Upload atom data file', type=['txt'])
+    bond_file = st.file_uploader('Upload bond data file', type=['txt'])
+    
+    if atom_file and bond_file:
+        atom_data, axis_ratio = read_atom_data(atom_file)
+        bond_data = read_bond_data(bond_file)
+        show_labels = st.checkbox('Show atom labels')
+    
+        fig = plot_crystal_structure(atom_data, bond_data, show_labels, axis_ratio)
+        st.pyplot(fig)
+    else:
+        st.info('Please upload the data files.')
+        
 if __name__ == "__main__":
-    # コマンドライン引数の解析
-    atom_filename = sys.argv[1]
-    bond_filename = sys.argv[2]
-    show_labels = True if len(sys.argv) > 3 and sys.argv[3] == 'True' else False
-
-    # 原子構造のプロット
-    plot_crystal_structure(atom_filename, bond_filename, show_labels)
-
-# ブランチテスト用コメント
+    main()
